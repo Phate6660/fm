@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
 
@@ -20,8 +19,8 @@ fn view_returned(file: &str) -> String {
     contents
 }
 
-fn list_all_files(dir: &str) -> HashMap<usize, (&str, String)> {
-    let mut files = HashMap::new();
+fn list_all_files(dir: &str) -> Vec<(&str, String)> {
+    let mut files = Vec::new();
     if std::path::Path::new(dir).exists() {
         let file_list = std::fs::read_dir(dir).unwrap();
         for (idx, file) in file_list.enumerate() {
@@ -44,17 +43,16 @@ fn main() {
     let dir = args.get(1).unwrap_or(&cwd);
     let files = list_all_files(dir);
     println!("Please select a file via number.");
-    let sorted_files: Vec<(_, _)> = files.iter().map(|(_id, (ft, fb))| { (ft, fb) }).collect();
-    for (idx, (ftype, formatted_file)) in sorted_files.iter().enumerate() {
+    for (idx, (ftype, formatted_file)) in files.iter().enumerate() {
         // file_index, file_type, file_name
         println!("{0: <} {1: <4} {2: <}", idx, ftype, formatted_file);
     }
     let input: usize = prompt("> ").parse().unwrap();
-    let file = &files.get(&input).unwrap().1;
-    let op = prompt(&format!("What would you like to do with '{}'?\nYou can use 'v' to view it. ", file).as_str());
+    let file = &files.get(input).unwrap().1;
+    let op = prompt(format!("What would you like to do with '{}'?\nYou can use 'v' to view it. ", file).as_str());
     match op.as_str() {
         "v" | "view" => {
-            let output = view_returned(&file);
+            let output = view_returned(file);
             println!("{}", output);
         },
         _ => println!("'{}' is an unsupported operation!", op)
