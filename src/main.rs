@@ -11,6 +11,14 @@ fn prompt(prompt: &str) -> String {
     input.trim().to_string()
 }
 
+fn edit_file(file: &str) {
+    let editor = std::env::var("EDITOR").unwrap_or_else(|_| prompt("Please input your editor: "));
+    std::process::Command::new(editor)
+        .arg(file)
+        .spawn()
+        .expect("failed to spawn editor");
+}
+
 fn view_returned(file: &str) -> String {
     let usable_file = File::open(file).unwrap();
     let mut bufreader = BufReader::new(usable_file);
@@ -49,12 +57,10 @@ fn main() {
     }
     let input: usize = prompt("> ").parse().unwrap();
     let file = &files.get(input).unwrap().1;
-    let op = prompt(format!("What would you like to do with '{}'?\nYou can use 'v' to view it. ", file).as_str());
+    let op = prompt(format!("What would you like to do with '{}'?\nYou can use 'e' to edit it and 'v' to view it. ", file).as_str());
     match op.as_str() {
-        "v" | "view" => {
-            let output = view_returned(file);
-            println!("{}", output);
-        },
+        "e" | "edit" => edit_file(file),
+        "v" | "view" => println!("{}", view_returned(file)),
         _ => println!("'{}' is an unsupported operation!", op)
     }
 }
