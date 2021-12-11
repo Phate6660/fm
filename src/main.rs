@@ -31,7 +31,7 @@ fn list_all_files(dir: &str) -> Vec<(&str, String)> {
     let mut files = Vec::new();
     if std::path::Path::new(dir).exists() {
         let file_list = std::fs::read_dir(dir).unwrap();
-        for (idx, file) in file_list.enumerate() {
+        for file in file_list {
             let entry = file.unwrap().path();
             let file_type = if entry.is_dir() {
                 "dir"
@@ -39,7 +39,7 @@ fn list_all_files(dir: &str) -> Vec<(&str, String)> {
                 "file"
             };
             let formatted_entry = entry.to_str().unwrap().replace("./", "");
-            files.insert(idx, (file_type, formatted_entry));
+            files.push((file_type, formatted_entry));
         }
     }
     files
