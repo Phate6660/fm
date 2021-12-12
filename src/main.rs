@@ -13,10 +13,22 @@ fn prompt(prompt: &str) -> String {
 
 fn edit_file(file: &str) {
     let editor = std::env::var("EDITOR").unwrap_or_else(|_| prompt("Please input your editor: "));
+    let file_path = "/tmp/tmp.txt";
+    let mut file_contents = String::new();
+    File::open(file).unwrap().read_to_string(&mut file_contents).unwrap();
+    let mut editable_file = File::create(&file_path).expect("failed to create tmp file");
+    writeln!(editable_file, "{}", file_contents).unwrap();
+    
     std::process::Command::new(editor)
-        .arg(file)
-        .spawn()
+        .arg(file_path)
+        .status()
         .expect("failed to spawn editor");
+
+    let mut modified_file_contents = String::new();
+    let mut modified_editable_file = File::open(&file_path).unwrap();
+    modified_editable_file.read_to_string(&mut modified_file_contents).unwrap();
+
+    writeln!(File::create(file).unwrap(), "{}", modified_file_contents).unwrap();
 }
 
 fn view_returned(file: &str) -> String {
