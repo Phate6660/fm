@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
 
+/// Takes `prompt` as a reference and returns the user's input.
 fn prompt(prompt: &str) -> String {
     print!("{}", prompt);
     std::io::stdout().flush().unwrap();
@@ -11,6 +12,8 @@ fn prompt(prompt: &str) -> String {
     input.trim().to_string()
 }
 
+/// Takes `file` as a reference, reads it's contents, pushes the contents to a tmp file, opens the
+/// tmp file in the editor, and then rewrites the contents of the tmp file to the original file.
 fn edit_file(file: &str) {
     let editor = std::env::var("EDITOR").unwrap_or_else(|_| prompt("Please input your editor: "));
     let file_path = "/tmp/tmp.txt";
@@ -36,6 +39,7 @@ fn edit_file(file: &str) {
     writeln!(File::create(file).unwrap(), "{}", modified_file_contents).unwrap();
 }
 
+/// Takes `file` as a reference, reads it's contents, and returns it as a String.
 fn view_returned(file: &str) -> String {
     let usable_file = File::open(file).unwrap();
     let mut bufreader = BufReader::new(usable_file);
@@ -44,6 +48,8 @@ fn view_returned(file: &str) -> String {
     contents
 }
 
+/// Takes `dir` as a reference, iterates over all files in the directory, and returns a vector of
+/// (`file_type`, `file_name`) tuples.
 fn list_all_files(dir: &str) -> Vec<(&str, String)> {
     let mut files = Vec::new();
     if std::path::Path::new(dir).exists() {
@@ -60,10 +66,12 @@ fn list_all_files(dir: &str) -> Vec<(&str, String)> {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+    // Default to current working directory if none is specified.
     let cwd = String::from(".");
     let dir = args.get(1).unwrap_or(&cwd);
     let files = list_all_files(dir);
     println!("Please select a file via number.");
+    // Pretty print the files.
     for (idx, (ftype, formatted_file)) in files.iter().enumerate() {
         // file_index, file_type, file_name
         println!("{0: <} {1: <4} {2: <}", idx, ftype, formatted_file);
